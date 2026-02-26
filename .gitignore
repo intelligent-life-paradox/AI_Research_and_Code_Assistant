@@ -1,0 +1,8 @@
+.env
+venv/
+knowledge/articles/
+knowledge/repos/
+rag/storage
+crew_diffusion/.env
+crew_diffusion/src/crew_diffusion/__pycache__
+crew_diffusion/.DS_Store
