@@ -172,7 +172,8 @@ Para usar, adicione sua chave no GitHub:
 
 ### 1.
 Um possível gargalo desse projeto é a API. Esse futuro cientista de dados que vos fala não usou nenhuma API paga, portanto, é provável que se gere o erro de RateLimit — ou algo similar. 
-Você também pode — quem sabe até deve — mudar os modelos para cada agente indo em crew_diffusion\src\crew_diffusion\crew.py. Selecione os melhores modelos, deixe as temperaturas baixas para eles não delirarem nessas tarefas, salve o arquivo novamente e rode a pipeline como descrito acima.
+
+Você também pode — quem sabe até deve — mudar os modelos para cada agente indo em *crew_diffusion\src\crew_diffusion\crew.py*. Selecione os melhores modelos, deixe as temperaturas baixas para eles não delirarem nessas tarefas, salve o arquivo novamente e rode a pipeline como descrito acima.
 De preferência, selecione algum modelo disponível pela API do GROQ para você não ter que mudar as chamadas de enviroment em alguns files.
 
 ### 2.
