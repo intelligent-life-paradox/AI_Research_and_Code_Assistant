@@ -12,12 +12,8 @@ diff_crew/
 │   └── workflows/
 │       └── pipeline.yml          # Pipeline automatizado (GitHub Actions)
 ├── crew_diffusion/
-│   ├── knowledge/
-│   │   ├── articles/             # PDFs, livros e artigos sobre modelos de difusão
-│   │   └── repos/                # Repositórios de código clonados
-│   ├── rag/
-│   │   ├── index_pdfs.ipynb      # Notebook: indexa artigos no ChromaDB
-│   │   └── index_codes.ipynb     # Notebook: indexa código no ChromaDB
+│                # Repositórios de código clonados
+│
 │   ├── src/
 │   │   └── crew_diffusion/
 │   │       ├── config/
@@ -29,11 +25,19 @@ diff_crew/
 │   │       │   └── codes_tool.py     # Tool que consulta a coleção "codes" no ChromaDB
 │   │       ├── crew.py           # Montagem do Crew, agentes, LLMs e injeção de tools
 │   │       └── main.py           # Ponto de entrada da aplicação
-│   ├── source_of_all_knowledge.yml  # Arquivo de configuração das fontes de conhecimento
-│   ├── ingest_knowledge.py          # Script de ingestão das fontes para a pasta knowledge/
-│   └── chroma_db/                   # Banco vetorial ChromaDB (gerado automaticamente)
+├── source_of_all_knowledge.yml  # Arquivo de configuração das fontes de conhecimento
+├── ingest_knowledge.py          # Script de ingestão das fontes para a pasta knowledge/
+│                     # Banco vetorial ChromaDB (gerado automaticamente)
 ├── .env                             # Variáveis de ambiente (GROQ_API_KEY)
-└── pyproject.toml
+├── knowledge/
+│      ├── articles/             # PDFs, livros e artigos sobre modelos de difusão
+│      └── repos/
+│requirements.txt
+├── rag/
+│   │   ├── index_pdfs.ipynb      # Notebook: indexa artigos no ChromaDB
+│   │   └── index_codes.ipynb
+        └── storage/chromadb
+          
 ```
 
 ---
@@ -167,7 +171,7 @@ Para usar, adicione sua chave no GitHub:
 ## Observações importantes!!!
 
 ### 1.
-Um possível gargalo desse projeto é a API. Esse futuro cientista de dados que vos fala não usou nenhuma API paga , portanto, é provável que se gere o erro de RateLimit  ou algo similar. 
+Um possível gargalo desse projeto é a API. Esse futuro cientista de dados que vos fala não usou nenhuma API paga, portanto, é provável que se gere o erro de RateLimit — ou algo similar. 
 Você também pode — quem sabe até deve — mudar os modelos para cada agente indo em crew_diffusion\src\crew_diffusion\crew.py. Selecione os melhores modelos, deixe as temperaturas baixas para eles não delirarem nessas tarefas, salve o arquivo novamente e rode a pipeline como descrito acima.
 De preferência, selecione algum modelo disponível pela API do GROQ para você não ter que mudar as chamadas de enviroment em alguns files.
 
