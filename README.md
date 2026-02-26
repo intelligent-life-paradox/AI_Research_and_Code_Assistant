@@ -27,7 +27,7 @@ diff_crew/
 │   │       └── main.py           # Ponto de entrada da aplicação
 ├── source_of_all_knowledge.yml  # Arquivo de configuração das fontes de conhecimento
 ├── ingest_knowledge.py          # Script de ingestão das fontes para a pasta knowledge/
-│                     # Banco vetorial ChromaDB (gerado automaticamente)
+│                     
 ├── .env                             # Variáveis de ambiente (GROQ_API_KEY)
 ├── knowledge/
 │      ├── articles/             # PDFs, livros e artigos sobre modelos de difusão
@@ -36,7 +36,7 @@ diff_crew/
 ├── rag/
 │   │   ├── index_pdfs.ipynb      # Notebook: indexa artigos no ChromaDB
 │   │   └── index_codes.ipynb
-        └── storage/chromadb
+        └── storage/chromadb # Banco vetorial ChromaDB (gerado automaticamente após rodar os notebooks na sequência que aparecem)
           
 ```
 
