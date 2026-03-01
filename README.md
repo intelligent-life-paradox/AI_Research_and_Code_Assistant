@@ -178,3 +178,7 @@ De preferência, selecione algum modelo disponível pela API do GROQ para você 
 
 ### 2.
 Esse projeto é um complemento de outro projeto, contudo, ainda é um projeto em andamento. Se você está lendo isso nesse momento, ainda implementarei um aplicativo para ficar algo ainda mais user-friendly, conectarei com algum framework de api e usarei docker também. 
+
+## Deploy via Docker + FastAPI + Gradio
+
+Veja um guia prático em `docs/docker_fastapi_gradio.md` para expor os agentes por API e frontend web.
