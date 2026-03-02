@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 name: Diffusion Models AI Pipeline
+=======
+name: Diffusion Models With Help of AI Pipeline
+>>>>>>> 70ef76879d53bbede125920ffabaef46a9ec05a2
 
 on:
   push:
     branches: [main]
+<<<<<<< HEAD
   workflow_dispatch:
 
 jobs:
@@ -47,3 +52,42 @@ jobs:
 
       - name: Build Docker Image
         run: docker build . --file Dockerfile --tag diff-crew-app:latest
+=======
+  workflow_dispatch:  # trigger this thing
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' #Modify it for your own enviroment
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Step 1 - Ingest knowledge
+        run: |
+          python ingest_knowledge.py
+
+      - name: Step 2 - Index PDFs
+        run: |
+          jupyter nbconvert --to notebook --execute rag/index_pdfs.ipynb
+
+      - name: Step 3 - Index code repositories
+        run: |
+          jupyter nbconvert --to notebook --execute rag/index_codes.ipynb
+
+      - name: Step 4 - Run crew
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          USER_INPUT: "Explain the forward diffusion process in DDPM"
+        run: |
+          cd src && python -m crew_diffusion.main
+>>>>>>> 70ef76879d53bbede125920ffabaef46a9ec05a2
