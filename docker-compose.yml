@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  diff-crew-app:
+    build: .
+    container_name: diff_crew_container
+    ports:
+      - "7860:7860"
+    volumes:
+      # Mapeia a pasta de conhecimento local para o container (Persistencia dos arquivos)
+      #Pense nisso como um "base" para os agentes. Desse modo, você terá pelo menos um assunto para falar com eles desde o início, e pode ir alimentando com mais conhecimento ao longo do tempo.
+      - ./crew_diffusion/knowledge:/app/crew_diffusion/knowledge
+      
+      # Mapeia o banco vetorial (Chroma) para persistir o aprendizado
+      - ./rag/storage:/app/rag/storage
+      
+      #
+      - ./crew_diffusion/src:/app/crew_diffusion/src
+      - ./rag:/app/rag
+      
+    
+    env_file:
+      - crew_diffusion/.env
+      
+    #
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      
+    restart: unless-stopped

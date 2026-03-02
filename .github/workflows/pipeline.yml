@@ -1,0 +1,49 @@
+name: Diffusion Models AI Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Job anterior + atualização: Testa a logica Python (Ingestao, Indexacao, Execucao)
+  pipeline:
+    runs-on: ubuntu-latest
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r crew_diffusion/requirements.txt
+          pip install arxiv gitpython llama-index llama-index-vector-stores-chroma chromadb
+
+      - name: Ingest and Index Knowledge
+        run: python rag/pipeline_manager.py --mode all
+
+      - name: Run CrewAI Agent
+        env:
+          USER_INPUT: "Explain the forward diffusion process in DDPM"
+        run: cd crew_diffusion/src && python -m crew_diffusion.main
+
+  # novo job: verificar se a aplicacao pode ser containerizada com sucesso
+  docker-build-check:
+    runs-on: ubuntu-latest
+    
+    needs: pipeline
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build . --file Dockerfile --tag diff-crew-app:latest

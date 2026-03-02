@@ -1,0 +1,50 @@
+routing_task:
+  description: >
+    Analyze the following user request and determine its nature:
+    - If it asks for explanations, theory, math, or conceptual understanding
+      of diffusion models → delegate to the Explainer Agent.
+    - If it asks for code, implementations, examples, or file generation → 
+      delegate to the Coder Agent.
+    
+    User request: {user_input}
+    
+    You must delegate. Do not attempt to answer the question yourself.
+  expected_output: >
+    A delegation decision with the original user request passed intact to
+    the appropriate specialist agent.
+  agent: manager_agent
+
+explanation_task:
+  description: >
+    Using ONLY the articles_query_tool, retrieve relevant passages from the
+    academic papers and books collection to answer the following theoretical
+    question about diffusion models:
+    
+    {user_input}
+    
+    Synthesize retrieved passages into a clear, structured explanation.
+    Do not generate any code. Do not use any tool other than articles_query_tool.
+  expected_output: >
+    A well-structured textual explanation covering the theoretical concepts
+    requested. Must cite or reference the retrieved source material.
+    No code blocks of any kind.
+  agent: explainer_agent
+
+coding_task:
+  description: >
+    Using ONLY the codes_query_tool, retrieve relevant code snippets from the
+    source code repositories collection to answer the following implementation
+    question about diffusion models:
+    
+    {user_input}
+    
+    If the user explicitly requests a file, generate a complete .py or .ipynb
+    file saved to the ./output directory. Otherwise, return a detailed code
+    response inline.
+    
+    Do not use any tool other than codes_query_tool.
+  expected_output: >
+    A complete, executable code implementation grounded in retrieved repository
+    examples. If a file was requested, provide the output path. Code must be
+    commented and follow PEP8 standards.
+  agent: coder_agent

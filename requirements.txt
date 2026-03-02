@@ -1,0 +1,14 @@
+llama-index-core>=0.14
+llama-index-llms-groq
+llama-index-embeddings-huggingface
+llama-index-readers-file
+llama-index-vector-stores-chroma
+crewai
+crewai-tools
+gradio
+python-dotenv
+GitPython
+arxiv
+litellm
+tree-sitter
+tree-sitter-language-pack

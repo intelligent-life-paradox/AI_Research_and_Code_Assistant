@@ -1,0 +1,9 @@
+articles:
+  - "attention is all you need"
+
+repos:
+  - "https://github.com/microsoft/foldingdiff"
+  - "https://github.com/harryjo97/riemannian-diffusion-mixture-torch"
+
+
+#Coloque fontes para rag aqui. 
