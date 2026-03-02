@@ -1,175 +1,237 @@
-# 🤖 Diff Crew — Assistente de Machine Learning com CrewAI
-
-Sistema multi-agente construído com **CrewAI**, **LlamaIndex** e **ChromaDB** para responder perguntas teóricas e de implementação sobre modelos de difusão. O sistema consulta artigos acadêmicos e repositórios de código indexados localmente, sem depender de fontes externas.
-
+---
+title: Diff Crew Agent
+emoji: 🤖
+colorFrom: green
+colorTo: blue
+sdk: docker
+app_port: 7860
 ---
 
-##  Estrutura do Projeto
 
-```
+
+# Diff Crew Agent
+
+## Assistente de Machine Learning com CrewAI
+
+Sistema multi-agente construído com CrewAI, LlamaIndex e ChromaDB para
+responder perguntas teóricas e de implementação sobre modelos de difusão
+(meu tópico de pesquisa recente).
+
+Funcionalidades novas (03/02/26): O sistema agora está encapsulado em
+uma aplicação Docker com interface gráfica via Gradio.
+
+O sistema é capaz de responder perguntas teóricas e gerar código sobre
+Modelos de Difusão, utilizando uma base de conhecimento local (RAG) que
+pode ser atualizada dinamicamente via interface. O sistema consulta
+artigos acadêmicos e repositórios de código indexados localmente, sem
+depender de fontes externas. Apesar dos agentes serem alimentados, via
+RAG, por correlatos desse tópico, nada lhe impede de fazer embedding de
+seus próprios arquivos ou repositórios de código.
+
+------------------------------------------------------------------------
+
+# Estrutura do Projeto
+
+``` text
 diff_crew/
 ├── .github/
 │   └── workflows/
-│       └── pipeline.yml          # Pipeline automatizado (GitHub Actions)
+│       └── pipeline.yml
+├── rag/
+│   ├── pipeline_manager.py
+│   └── storage/
 ├── crew_diffusion/
 │   ├── knowledge/
-│   │   ├── articles/             # PDFs, livros e artigos sobre modelos de difusão
-│   │   └── repos/                # Repositórios de código clonados
-│   ├── rag/
-│   │   ├── index_pdfs.ipynb      # Notebook: indexa artigos no ChromaDB
-│   │   └── index_codes.ipynb     # Notebook: indexa código no ChromaDB
+│   │   ├── articles/
+│   │   └── repos/
 │   ├── src/
 │   │   └── crew_diffusion/
 │   │       ├── config/
-│   │       │   ├── agents.yaml   # Definição de role, goal e backstory dos agentes
-│   │       │   └── tasks.yaml    # Definição das tarefas de cada agente
 │   │       ├── tools/
-│   │       │   ├── __init__.py
-│   │       │   ├── articles_tool.py  # Tool que consulta a coleção "articles" no ChromaDB
-│   │       │   └── codes_tool.py     # Tool que consulta a coleção "codes" no ChromaDB
-│   │       ├── crew.py           # Montagem do Crew, agentes, LLMs e injeção de tools
-│   │       └── main.py           # Ponto de entrada da aplicação
-│   ├── source_of_all_knowledge.yml  # Arquivo de configuração das fontes de conhecimento
-│   ├── ingest_knowledge.py          # Script de ingestão das fontes para a pasta knowledge/
-│   └── chroma_db/                   # Banco vetorial ChromaDB (gerado automaticamente)
-├── .env                             # Variáveis de ambiente (GROQ_API_KEY)
-└── pyproject.toml
+│   │       ├── crew.py
+│   │       └── main.py
+│   └── source_of_all_knowledge.yml
+├── app.py
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── .env
 ```
 
----
+------------------------------------------------------------------------
 
-##  Agentes (os agentes a seguir foram feitos usando-se do template disponibilizado pelo crewai)
+# Agentes do Sistema
 
-### 1. Manager Agent
-Responsável exclusivamente por entender a intenção do usuário e delegar a tarefa para o agente correto. **Não responde perguntas técnicas diretamente.** Usa um modelo menor e mais rápido.
+## 1. Router Agent (Local)
 
-### 2. Explainer Agent
-Responde perguntas teóricas, conceituais e matemáticas sobre modelos de difusão. Consulta **apenas** a coleção `articles` do ChromaDB (artigos e livros). Nunca gera código. 
+Responsável por:
 
-### 3. Coder Agent
-Responde perguntas sobre implementações e gera código Python. Consulta **apenas** a coleção `codes` do ChromaDB (repositórios de código). Pode salvar arquivos `.py` ou `.ipynb` na pasta `output/`.
+-   interpretar a intenção do usuário
+-   delegar a tarefa ao agente correto
 
----
+Características:
 
-##  Tools
+- Não responde perguntas. Ele só delega.
 
-| Tool | Coleção ChromaDB | Agente que usa |
-|---|---|---|
-| `articles_query_tool` | `articles` | Explainer Agent |
-| `codes_query_tool` | `codes` | Coder Agent |
+## 2. Explainer Agent
 
-Cada tool é isolada intencionalmente — isso é basicamente uma boa prática quando se lida com agentes.
+Responsável por:
 
----
+-   explicações conceituais
+-   fundamentos matemáticos
+-   interpretação de artigos científicos
 
-##  Configuração Inicial
+Fonte de dados:
 
-### 1. Clone o repositório e ative o ambiente virtual
+-   coleção `articles` do ChromaDB
 
-```bash
-git clone <url-do-repositorio>
-cd diff_crew/crew_diffusion
-python -m venv venv
-venv\Scripts\activate        # Windows
-# ou
-source venv/bin/activate     # Linux/Mac
+Restrição: nunca gera código.
+
+## 3. Coder Agent
+
+Responsável por:
+
+-   geração de código Python
+-   explicação de implementações
+-   análise de pipelines
+
+Fonte de dados:
+
+-   coleção `codes` do ChromaDB
+
+------------------------------------------------------------------------
+
+# Tools (Isolamento Intencional)
+
+  Tool                  Coleção ChromaDB   Agente
+  --------------------- ------------------ -----------------
+  articles_query_tool   articles           Explainer Agent
+  codes_query_tool      codes              Coder Agent
+
+Cada tool é isolada intencionalmente --- boa prática em sistemas
+multi-agentes.
+
+------------------------------------------------------------------------
+
+# Configuração Inicial (Docker --- Recomendado)
+
+## 1. Configure o arquivo .env
+
+``` bash
+GROQ_API_KEY=gsk_sua_chave_aqui
 ```
 
-### 2. Instale as dependências
+## 2. Suba o container
 
-```bash
-pip install -r requirements.txt
+``` bash
+docker-compose up --build
 ```
 
-### 3. Configure o arquivo `.env`
+Acesse:
 
-```bash
-GROQ_API_KEY=gsk_sua_chave_aqui *
-```
+    http://localhost:7860
 
----
+------------------------------------------------------------------------
 
-##  Como Rodar o Pipeline Manualmente
+# RAG Dinâmico
 
-### Passo I — Edite as fontes de conhecimento
+A interface permite:
 
-Abra o arquivo `source_of_all_knowledge.yml` e adicione os caminhos dos seus artigos/PDFs e repositórios de código que deseja indexar:
+-   upload de PDFs
+-   ingestão de repositórios GitHub
+-   reindexação em tempo real
 
-```yaml
+------------------------------------------------------------------------
+
+# Pipeline Manual (Legado)
+
+## Passo I --- Editar fontes
+
+Arquivo `source_of_all_knowledge.yml`:
+
+``` yaml
 articles:
-  - https://arxiv.org/pdf/2006.11239   # DDPM
-  - https://arxiv.org/pdf/2010.02502   # Score Matching
+  - https://arxiv.org/pdf/2006.11239
 
 repos:
   - https://github.com/huggingface/diffusers
-  - https://github.com/openai/consistency_models
-``` ACIMA SÃO SÓ EXEMPLOS(!!!)
-
-#
-
-Execute o script de ingestão. Ele vai baixar e salvar os arquivos na pasta `knowledge/`:
-
-```bash
-python ingest_knowledge.py
 ```
 
-### Passo II — Indexe os PDFs no ChromaDB
+## Passo II --- Indexação
 
-Abra e execute o notebook **na ordem correta**:
-
-```bash
-# Primeiro: indexa artigos e livros
-jupyter nbconvert --to notebook --execute rag/index_pdfs.ipynb
-
-# Segundo: indexa repositórios de código
-jupyter nbconvert --to notebook --execute rag/index_codes.ipynb
+``` bash
+python rag/pipeline_manager.py --mode all
 ```
 
->  **Importante:** o modelo de embeddings usado aqui deve ser o mesmo configurado nas tools (`articles_tool.py` e `codes_tool.py`). Se mudar o modelo de embeddings, precisará re-indexar tudo.
+## Passo III --- Executar Crew
 
-### Passo III — Execute o Crew
-
-```bash
-cd src
+``` bash
+cd crew_diffusion/src
 python -m crew_diffusion.main
 ```
 
-O sistema vai pedir uma pergunta:
+------------------------------------------------------------------------
 
+# Funcionalidades Atualizadas em 03/02/26
+
+## Full Docker Support
+
+Aplicação completamente containerizada.
+
+## Interface Gradio
+
+Interação e gerenciamento via navegador.
+
+
+
+## Pipeline Unificado
+
+Centralização da ingestão em:
+
+``` bash
+rag/pipeline_manager.py
 ```
-Ask anything about diff. models or codes: Explique o processo de difusão direta no DDPM (Exemplo)
-```
 
-O Manager Agent vai classificar a pergunta e delegar ao agente correto, que consultará o ChromaDB e retornará a resposta... ou pelo menos é isso que esperamos...
+## Pipeline Automatizado (GitHub Actions)
 
----
+Build Docker e testes automáticos a cada push.
 
-##  Pipeline Automatizado (GitHub Actions)
+------------------------------------------------------------------------
 
-O arquivo `.github/workflows/pipeline.yml` automatiza todos os passos acima a cada `push` na branch `main`, ou pode ser disparado manualmente pela aba **Actions** do GitHub.
+# Observações Importantes
 
-Para usar, adicione sua chave no GitHub:
-> Repositório → Settings → Secrets and variables → Actions → `GROQ_API_KEY`
+## 1. Gargalo de API
 
----
+Uso apenas de APIs gratuitas. Possível ocorrência de RateLimit.
 
-##  Dependências Principais
+Recomendações:
 
-| Pacote | Função |
-|---|---|
-| `crewai` | Orquestração dos agentes |
-| `litellm` | Interface com a API do Groq |
-| `llama-index` | Query engine sobre o ChromaDB |
-| `chromadb` | Banco vetorial local |
-| `fastembed` | Geração de embeddings (local, gratuito) |
-| `python-dotenv` | Leitura do `.env` |
+-   reduzir temperatura dos modelos
+-   alterar modelos em crew.py
 
-## Observações importantes!!!
+## 2. Estado do Projeto
 
-### 1.
-Um possível gargalo desse projeto é a API. Esse futuro cientista de dados que vos fala não usou nenhuma API paga , portanto, é provável que se gere o erro de RateLimit  ou algo similar. 
-Você também pode — quem sabe até deve — mudar os modelos para cada agente indo em crew_diffusion\src\crew_diffusion\crew.py. Selecione os melhores modelos, deixe as temperaturas baixas para eles não delirarem nessas tarefas, salve o arquivo novamente e rode a pipeline como descrito acima.
-De preferência, selecione algum modelo disponível pela API do GROQ para você não ter que mudar as chamadas de enviroment em alguns files.
+Projeto em desenvolvimento contínuo, funcionando como complemento de um
+sistema maior de pesquisa em Machine Learning.
 
-### 2.
-Esse projeto é um complemento de outro projeto, contudo, ainda é um projeto em andamento. Se você está lendo isso nesse momento, ainda implementarei um aplicativo para ficar algo ainda mais user-friendly, conectarei com algum framework de api e usarei docker também. 
+A atualização de 03/02/26 focou em:
+
+-   portabilidade
+-   usabilidade
+-   reprodutibilidade científica
+
+------------------------------------------------------------------------
+
+# Resumo
+
+O Diff Crew Agent transforma artigos e repositórios em um assistente de
+pesquisa interativo, combinando:
+
+-   RAG local
+-   agentes especializados
+-   geração de código
+-   explicações teóricas profundas
+-   execução containerizada
+
+Um passo em direção a assistentes científicos especializados e
+reproduzíveis.
