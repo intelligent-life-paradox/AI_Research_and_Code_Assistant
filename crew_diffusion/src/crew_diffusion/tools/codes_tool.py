@@ -7,7 +7,7 @@ from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
 
 Settings.embed_model = HuggingFaceEmbedding(
-    model_name="BAAI/bge-small-en-v1.5"",
+    model_name="BAAI/bge-small-en-v1.5",
     device="cpu",
     embed_batch_size=2
 )
