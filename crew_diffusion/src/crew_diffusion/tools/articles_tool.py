@@ -13,7 +13,7 @@ Settings.embed_model = HuggingFaceEmbedding(
 )
 Settings.llm = None
 
-CHROMA_PATH = Path(__file__).parent.parent.parent / "rag" / "storage" / "chroma_db"
+ CHROMA_PATH = Path("/app/rag/storage/chroma_db")
 
 class ArticlesQueryInput(BaseModel):
     query: str = Field(..., description="Theoretical question about diffusion models")
