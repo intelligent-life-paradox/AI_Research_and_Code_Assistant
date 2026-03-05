@@ -12,9 +12,7 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
-# indexa os dados durante o build da imagem
-RUN python rag/pipeline_manager.py --mode all
-
 EXPOSE 7860
 
-CMD ["python", "app.py"]
+# indexa quando o container INICIA, não no build
+CMD ["sh", "-c", "python rag/pipeline_manager.py --mode all && python app.py"]
