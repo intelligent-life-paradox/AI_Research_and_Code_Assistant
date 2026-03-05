@@ -1,9 +1,19 @@
 import chromadb
-from llama_index.core import VectorStoreIndex
+from pathlib import Path
+from llama_index.core import VectorStoreIndex, StorageContext, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.core import StorageContext
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
+
+Settings.embed_model = HuggingFaceEmbedding(
+    model_name="BAAI/bge-small-en-v1.5",
+    device="cpu",
+    embed_batch_size=2
+)
+Settings.llm = None
+
+CHROMA_PATH = Path(__file__).parent.parent.parent / "rag" / "storage" / "chroma_db"
 
 class ArticlesQueryInput(BaseModel):
     query: str = Field(..., description="Theoretical question about diffusion models")
@@ -18,15 +28,11 @@ class ArticlesQueryTool(BaseTool):
     args_schema: type[BaseModel] = ArticlesQueryInput
 
     def _run(self, query: str) -> str:
-        chroma_client = chromadb.PersistentClient(path="./chormadb")
+        chroma_client = chromadb.PersistentClient(path=str(CHROMA_PATH))
         chroma_collection = chroma_client.get_collection("articles")
-        
         vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
-        index = VectorStoreIndex.from_vector_store(
-            vector_store, storage_context=storage_context
-        )
-        
-        query_engine = index.as_query_engine(similarity_top_k=3) #lets not set thaaat higher due to performance issues with the API
+        index = VectorStoreIndex.from_vector_store(vector_store, storage_context=storage_context)
+        query_engine = index.as_query_engine(similarity_top_k=3)
         response = query_engine.query(query)
         return str(response)

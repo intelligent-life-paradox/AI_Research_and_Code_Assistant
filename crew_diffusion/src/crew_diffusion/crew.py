@@ -43,7 +43,7 @@ class CreateCrew():
             role='MANAGER',
             default_model='openrouter/meta-llama/llama-3.1-8b-instruct',
             default_temp=0.0,
-            default_max_tokens=100,
+            default_max_tokens=400,
         )
 
 
