@@ -6,10 +6,18 @@ import arxiv
 import yaml
 from pathlib import Path
 from git import Repo
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext, Settings
 from llama_index.core.node_parser import CodeSplitter, SentenceSplitter
 from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import chromadb
+
+Settings.embed_model = HuggingFaceEmbedding(
+    model_name="intfloat/multilingual-e5-large",
+    device="cpu",
+    embed_batch_size=2
+)
+Settings.llm = None
 
 # Caminhos
 BASE_DIR = Path(__file__).parent.parent
@@ -18,7 +26,6 @@ ARTICLES_DIR = KNOWLEDGE_DIR / "articles"
 REPOS_DIR = KNOWLEDGE_DIR / "repos"
 CHROMA_PATH = BASE_DIR / "rag" / "storage" / "chroma_db"
 CONFIG_PATH = BASE_DIR / "source_of_all_knowledge.yml"
-
 
 
 def load_configs():
@@ -68,17 +75,13 @@ def save_uploaded_file(file_obj):
     shutil.copy(file_obj.name, dest_path)
     return f"[SUCCESS] File saved: {os.path.basename(file_obj.name)}"
 
-# Novas funções de indexação a seguir: 
-
 def run_indexing_process():
     print("\n[INFO] Starting Indexing Process...")
     try:
-        #
         CHROMA_PATH.parent.mkdir(parents=True, exist_ok=True)
         
         db = chromadb.PersistentClient(path=str(CHROMA_PATH))
         
-        #
         collection_articles = db.get_or_create_collection("articles")
         vector_store_articles = ChromaVectorStore(chroma_collection=collection_articles)
         storage_context_articles = StorageContext.from_defaults(vector_store=vector_store_articles)
@@ -88,7 +91,6 @@ def run_indexing_process():
             VectorStoreIndex.from_documents(docs_pdf, storage_context=storage_context_articles)
             print(f"[INFO] Indexed {len(docs_pdf)} article pages.")
         
-       
         collection_codes = db.get_or_create_collection("codes")
         vector_store_codes = ChromaVectorStore(chroma_collection=collection_codes)
         storage_context_codes = StorageContext.from_defaults(vector_store=vector_store_codes)
@@ -119,7 +121,6 @@ def run_indexing_process():
         print(f" Fatal error during indexing: {e}")
         raise e
 
-# 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
