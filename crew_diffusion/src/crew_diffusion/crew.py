@@ -15,11 +15,20 @@ class CreateCrew():
     tasks_config = 'config/tasks.yaml'
 
     def _build_llm(self, role: str, default_model: str, default_temp: float, default_max_tokens: int):
-        api_key = os.getenv('OPENROUTER_API_KEY')
-        api_base = os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1')
+        model = os.getenv(f'MODEL_{role}', default_model)
+        
+        if model.startswith('groq/'):
+            api_key = os.getenv('GROQ_API_KEY')
+            api_base = 'https://api.groq.com/openai/v1'
+        else:
+            api_key = os.getenv('OPENROUTER_API_KEY')
+            api_base = os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1')
+
         retries = int(os.getenv('RETRY_ATTEMPTS', '3'))
         timeout = int(os.getenv('LLM_TIMEOUT_SECONDS', '60'))
-        return LLM(model=os.getenv(f'MODEL_{role}', default_model),
+
+        return LLM(
+            model=model,
             temperature=float(os.getenv(f'TEMP_{role}', str(default_temp))),
             max_tokens=int(os.getenv(f'MAX_TOKENS_{role}', str(default_max_tokens))),
             api_key=api_key,
@@ -27,7 +36,6 @@ class CreateCrew():
             max_retries=retries,
             timeout=timeout,
         )
-
 
     
     def _manager_llm(self):
