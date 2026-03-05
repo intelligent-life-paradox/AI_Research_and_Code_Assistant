@@ -58,9 +58,8 @@ def handle_chat(query, mode):
         return f"🤖 **Router Decision:** Essa tarefa deve ser enviada para o **{classification}**."
     
     
-     return f"⏳ **Processando...**\n\n" + \
-           run_crew_logic(user_query=query)
-
+     return f"⏳ **Processando...**\n\n" + \run_crew_logic(user_query=query)
+ 
 def handle_training(files, arxiv_title, repo_url):
     logs = []
     

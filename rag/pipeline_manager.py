@@ -17,7 +17,7 @@ KNOWLEDGE_DIR = BASE_DIR / "crew_diffusion" / "knowledge"
 ARTICLES_DIR = KNOWLEDGE_DIR / "articles"
 REPOS_DIR = KNOWLEDGE_DIR / "repos"
 CHROMA_PATH = BASE_DIR / "rag" / "storage" / "chroma_db"
-CONFIG_PATH = BASE_DIR / "crew_diffusion" / "source_of_all_knowledge.yml"
+CONFIG_PATH = BASE_DIR / "source_of_all_knowledge.yml"
 
 
 
