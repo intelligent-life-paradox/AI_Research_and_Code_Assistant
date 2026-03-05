@@ -11,9 +11,8 @@ from llama_index.core.node_parser import CodeSplitter, SentenceSplitter
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import chromadb
-
 Settings.embed_model = HuggingFaceEmbedding(
-    model_name="intfloat/multilingual-e5-large",
+    model_name="BAAI/bge-small-en-v1.5",  # test this for hugging face
     device="cpu",
     embed_batch_size=2
 )
