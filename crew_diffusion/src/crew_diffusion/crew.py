@@ -14,26 +14,44 @@ class CreateCrew():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
+    def _build_llm(self, role: str, default_model: str, default_temp: float, default_max_tokens: int):
+        api_key = os.getenv('OPENROUTER_API_KEY')
+        api_base = os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1')
+        retries = int(os.getenv('RETRY_ATTEMPTS', '3'))
+        timeout = int(os.getenv('LLM_TIMEOUT_SECONDS', '60'))
+        return LLM(model=os.getenv(f'MODEL_{role}', default_model),
+            temperature=float(os.getenv(f'TEMP_{role}', str(default_temp))),
+            max_tokens=int(os.getenv(f'MAX_TOKENS_{role}', str(default_max_tokens))),
+            api_key=api_key,
+            api_base=api_base,
+            max_retries=retries,
+            timeout=timeout,
+        )
+
+
     
     def _manager_llm(self):
-        return LLM(
-            model="groq/llama-3.1-8b-instant", 
-            temperature=0.1,
-            api_key=os.environ["GROQ_API_KEY"]
+        return self._build_llm(
+            role='MANAGER',
+            default_model='openrouter/meta-llama/llama-3.1-8b-instruct',
+            default_temp=0.0,
+            default_max_tokens=100,
         )
+
 
     def _explainer_llm(self):
-        return LLM(
-            model="groq/llama-3.3-70b-versatile",
-            temperature=0.5,
-            api_key=os.environ["GROQ_API_KEY"]
+        return self._build_llm(
+            role='EXPLAINER',
+            default_model='openrouter/qwen/qwen2.5-14b-instruct',
+            default_temp=0.4,
+            default_max_tokens=700,
         )
-
     def _coder_llm(self):
-        return LLM(
-            model="groq/deepseek-r1-distill-llama-70b",
-            temperature=0.27, #Why 0.27? I really couldn't  decide whether to put 0.2 or 0.3, but I lean towards the later
-            api_key=os.environ["GROQ_API_KEY"]
+        return self._build_llm(
+            role='CODER',
+            default_model='openrouter/qwen/qwen2.5-coder-14b-instruct',
+            default_temp=0.1,
+            default_max_tokens=1000,
         )
 
     # here we instantiate the tools we've previously made
@@ -97,7 +115,7 @@ class CreateCrew():
             tasks=self.tasks,
             process=Process.hierarchical,
             manager_agent=self.manager_agent(),
-            memory=True,
+            memory=False,
             cache=True,
             verbose=True
         )

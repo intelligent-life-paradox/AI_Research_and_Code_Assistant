@@ -2,6 +2,8 @@ import gradio as gr
 import os
 import sys
 from litellm import completion
+import time
+import random
 
 # Adiciona o src ao path para importar o crew corretamente
 sys.path.append(os.path.join(os.getcwd(), 'crew_diffusion', 'src'))
@@ -22,15 +24,29 @@ def router_agent(query):
     
     Responda APENAS com o nome do agente.
     """
-    try:
-        response = completion(
-            model="groq/llama3-8b-8192",
-            messages=[{"role": "user", "content": prompt}],
-            api_key=os.getenv("GROQ_API_KEY")
-        )
-        return response.choices[0].message.content
-    except Exception:
-        return "Indefinido (Erro API)"
+    model = os.getenv("MODEL_ROUTER", "openrouter/qwen/qwen2.5-7b-instruct")
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_base = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+    max_tokens = int(os.getenv("MAX_TOKENS_ROUTER", "16"))
+    retry_attempts = int(os.getenv("RETRY_ATTEMPTS", "3"))
+    backoff_base = float(os.getenv("RETRY_BACKOFF_BASE_SECONDS", "0.8"))
+
+    for attempt in range(retry_attempts):
+        try:
+            response = completion(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                api_key=api_key,
+                api_base=api_base,
+                max_tokens=max_tokens,
+                temperature=0,
+            )
+            return response.choices[0].message.content
+        except Exception:
+            if attempt == retry_attempts - 1:
+                return "Indefinido (Erro API)"
+            sleep_s = (backoff_base * (2 ** attempt)) + random.uniform(0, 0.25)
+            time.sleep(sleep_s)
 
 def handle_chat(query, mode):
     if not query:
@@ -42,8 +58,7 @@ def handle_chat(query, mode):
         return f"🤖 **Router Decision:** Essa tarefa deve ser enviada para o **{classification}**."
     
     
-    return f"🤖 **Router:** Delegando para **{classification}**...\n\n" + \
-           f"⏳ **Processando...**\n\n" + \
+     return f"⏳ **Processando...**\n\n" + \
            run_crew_logic(user_query=query)
 
 def handle_training(files, arxiv_title, repo_url):
@@ -76,7 +91,7 @@ with gr.Blocks(title="Diff Crew Lab", theme=gr.themes.Ocean()) as demo:
     
     with gr.Tabs():
         
-        with gr.Tab("💬 O_o Chat & Agentes o_O"):
+        with gr.Tab("💬  Chat & Agentes "):
             with gr.Row():
                 inp = gr.Textbox(label="Pergunta", placeholder="Ex: Explique a matemática do DDPM ou Crie um script de UNet")
             with gr.Row():
