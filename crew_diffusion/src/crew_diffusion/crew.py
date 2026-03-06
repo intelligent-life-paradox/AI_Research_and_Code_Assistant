@@ -127,3 +127,32 @@ class CreateCrew():
             cache=True,
             verbose=True
         )
+     def router_crew(self) -> Crew:
+        return Crew(
+            agents=[self.manager_agent()],
+            tasks=[self.routing_task()],
+            process=Process.sequential,
+            memory=False,
+            cache=True,
+            verbose=True,
+        )
+
+    def explainer_crew(self) -> Crew:
+        return Crew(
+            agents=[self.explainer_agent()],
+            tasks=[self.explanation_task()],
+            process=Process.sequential,
+            memory=False,
+            cache=True,
+            verbose=True,
+        )
+
+    def coder_crew(self) -> Crew:
+        return Crew(
+            agents=[self.coder_agent()],
+            tasks=[self.coding_task()],
+            process=Process.sequential,
+            memory=False,
+            cache=True,
+            verbose=True,
+        )

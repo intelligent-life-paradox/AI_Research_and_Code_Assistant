@@ -12,6 +12,19 @@ try:
 except ImportError:
     from src.crew_diffusion.crew import CreateCrew
 
+def parse_route_decision(route_text: str) -> str:
+    normalized = route_text.lower()
+    if "coder" in normalized or "coding" in normalized:
+        return "coding"
+    if "explainer" in normalized or "explanation" in normalized:
+        return "explanation"
+    return "explanation"
+
+
+def route_user_query(crew_factory: CreateCrew, user_query: str) -> str:
+    router_result = crew_factory.router_crew().kickoff(inputs={"user_input": user_query})
+    return parse_route_decision(str(router_result))
+
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
 def run(inputs=None):
@@ -36,7 +49,13 @@ def run(inputs=None):
     }
 
     try:
-        crew_instance = CreateCrew().crew()
+        crew_factory = CreateCrew()
+        route = route_user_query(crew_factory, user_query)
+        crew_instance = (
+            crew_factory.coder_crew()
+            if route == "coding"
+            else crew_factory.explainer_crew()
+        )
         result = crew_instance.kickoff(inputs=crew_inputs)
         
         print("\n < RESULT > \n")
@@ -108,7 +127,14 @@ def run_with_trigger():
     }
 
     try:
-        result = CreateCrew().crew().kickoff(inputs=inputs)
+        crew_factory = CreateCrew()
+        route = route_user_query(crew_factory, inputs["user_input"])
+        crew_instance = (
+            crew_factory.coder_crew()
+            if route == "coding"
+            else crew_factory.explainer_crew()
+        )
+        result = crew_instance.kickoff(inputs=inputs)
         return str(result)
     except Exception as e:
         raise Exception(f"An error occurred while running the crew with trigger: {e}")
