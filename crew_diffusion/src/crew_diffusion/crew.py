@@ -127,7 +127,7 @@ class CreateCrew():
             cache=True,
             verbose=True
         )
-     def router_crew(self) -> Crew:
+    def router_crew(self) -> Crew:
         return Crew(
             agents=[self.manager_agent()],
             tasks=[self.routing_task()],
