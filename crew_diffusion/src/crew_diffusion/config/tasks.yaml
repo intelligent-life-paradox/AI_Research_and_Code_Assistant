@@ -16,14 +16,24 @@ routing_task:
 
 explanation_task:
   description: >
-    Using ONLY the articles_query_tool, retrieve relevant passages from the
+    Using  ONLY the articles_query_tool, retrieve relevant passages from the
     academic papers and books collection to answer the following theoretical
     question about diffusion models:
     
     {user_input}
     
     Synthesize retrieved passages into a clear, structured explanation.
-    Do not generate any code. Do not use any tool other than articles_query_tool.
+    your constraints are during the task are:
+    -Do not generate any code. 
+    -Do not use any tool other than articles_tool.
+
+    your process is:
+
+    - conceptual overview
+    - mathematical intuition
+    - references to retrieved passages
+    - no hallucinations — only use retrieved material
+    - if something is uncertain, say so and reference the source of uncertainty
   expected_output: >
     A well-structured textual explanation covering the theoretical concepts
     requested. Must cite or reference the retrieved source material.
@@ -32,17 +42,90 @@ explanation_task:
 
 coding_task:
   description: >
-    Using ONLY the codes_query_tool, retrieve relevant code snippets from the
+    Using ONLY the codes_tool, retrieve relevant code snippets from the
     source code repositories collection to answer the following implementation
     question about diffusion models:
-    
+
+    Question:
     {user_input}
+
+    
     
     If the user explicitly requests a file, generate a complete .py or .ipynb
     file saved to the ./output directory. Otherwise, return a detailed code
     response inline.
     
-    Do not use any tool other than codes_query_tool.
+    Do not use any tool other than codes_tool.
+
+    WORKFLOW (MANDATORY):
+
+    Step 1 — Retrieve code
+    Use codes_tool to search the repository collection
+    for relevant diffusion implementations.
+
+    Step 2 — Inspect retrieved snippets
+    Identify patterns used in real repositories.
+
+    Step 3 — Adapt and synthesize
+    Combine retrieved examples with your engineering knowledge.
+
+    Step 4 — Produce working Python code.
+
+    If the user explicitly asks for a file:
+    - generate a full .py or .ipynb script
+    - assume it will be saved in ./output/
+
+    Otherwise return the code inline.
+
+    DO NOT invent APIs.
+    Base your answer primarily on retrieved repository code.
+
+    ------------------------------------------------------
+
+    FEW-SHOT REFERENCE EXAMPLES
+    (taken from HuggingFace Diffusers style)
+    - question: >
+        Implement the forward diffusion step q(x_t | x_{t-1}) used in DDPM.
+      answer: |
+        ```python
+        def q_sample(x0, t, noise, sqrt_alphas_cumprod, sqrt_one_minus_alphas_cumprod):
+            """
+            Sample from q(x_t | x_0)
+            """
+            return (
+                sqrt_alphas_cumprod[t] * x0 +
+                sqrt_one_minus_alphas_cumprod[t] * noise
+            )
+        ```
+        - question: >
+        Implement the noise prediction loss used in DDPM training.
+      answer: |
+        ```python
+        def diffusion_loss(model, x0, t, noise):
+            """
+            L_simple loss from DDPM paper.
+            """
+            x_t = q_sample(x0, t, noise)
+            noise_pred = model(x_t, t)
+            return torch.nn.functional.mse_loss(noise_pred, noise)
+        ```
+         - question: >
+        Implement a simple sinusoidal timestep embedding for diffusion models.
+      answer: |
+        ```python
+        import torch
+        import math
+
+        def timestep_embedding(timesteps, dim):
+            half_dim = dim // 2
+            freqs = torch.exp(
+                -math.log(10000) * torch.arange(0, half_dim) / half_dim
+            )
+            args = timesteps[:, None] * freqs[None]
+            embedding = torch.cat([torch.sin(args), torch.cos(args)], dim=-1)
+            return embedding
+        ```
+
   expected_output: >
     A complete, executable code implementation grounded in retrieved repository
     examples. If a file was requested, provide the output path. Code must be

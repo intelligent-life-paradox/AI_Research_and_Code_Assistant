@@ -23,7 +23,7 @@ class CodesQueryTool(BaseTool):
     description: str = ("""
         Queries the 'codes' ChromaDB collection containing source code repositories 
         related to diffusion models. Use this to retrieve implementation examples, 
-        function signatures, and code patterns. Returns relevant code snippets."""
+        function signatures, and code patterns. Returns relevant code snippets and their references."""
     )
     args_schema: type[BaseModel] = CodesQueryInput
 

@@ -16,14 +16,15 @@ Settings.llm = None
 CHROMA_PATH = Path("/app/rag/storage/chroma_db")
 
 class ArticlesQueryInput(BaseModel):
-    query: str = Field(..., description="Theoretical question about diffusion models")
+    query: str = Field(..., description="""Theoretical question about diffusion models
+    that requires information from academic papers and books.""")
 
 class ArticlesQueryTool(BaseTool):
     name: str = "articles_query_tool"
     description: str = (
         """you will query the 'articles' ChromaDB collection containing books and academic 
         papers about diffusion models. Use this to answer theoretical, conceptual, 
-        or mathematical questions. Returns relevant text passages."""
+        or mathematical questions. Returns relevant text passages and its references."""
     )
     args_schema: type[BaseModel] = ArticlesQueryInput
 
