@@ -85,32 +85,38 @@ def handle_training(files, arxiv_title, repo_url):
 
 
 with gr.Blocks(title="Diff Crew Lab", theme=gr.themes.Ocean()) as demo:
-    gr.Markdown("# Diff Crew — Local AI Lab")
+    gr.Markdown("""# Diff Crew — Local AI Lab
+                This app is meant to help research teams explore and understand diffusion models. Although
+                you could easily transform it to help with another topic by changing the knowledge base and the configs yaml files.""")
     
     with gr.Tabs():
         
-        with gr.Tab("💬  Chat & Agentes "):
+        with gr.Tab("💬  Chat & Agents "):
             with gr.Row():
                 inp = gr.Textbox(label="Pergunta", placeholder="Ex: Explique a matemática do DDPM ou Crie um script de UNet")
             with gr.Row():
-                btn_class = gr.Button("🔍 Classificar Agente", variant="secondary")
-                btn_run = gr.Button("🚀 Executar Crew", variant="primary")
-            out = gr.Markdown(label="Resposta")
+                btn_class = gr.Button("🔍 Classify agent", variant="secondary")
+                btn_run = gr.Button("🚀 Kickoff crew", variant="primary")
+            out = gr.Markdown(label="Answer")
             
             btn_class.click(fn=handle_chat, inputs=[inp, gr.State("Apenas Classificar")], outputs=out)
             btn_run.click(fn=handle_chat, inputs=[inp, gr.State("Executar")], outputs=out)
 
         #
-        with gr.Tab("📚 Base de Conhecimento"):
-            gr.Markdown("Adicione conhecimento. Os arquivos serão salvos em `knowledge/` e indexados no ChromaDB.")
+        with gr.Tab("📚 Knowledge Base"):
+            gr.Markdown("Add 'knowledge'. Files will be saved at `knowledge/` and  indexed at ChromaDB.")
+            gr.Markdown(" Upload  PDFs (articles, books, etc).")
+            gr.Markdown(" Upload github repositories with code implementations")
+            gr.Markdown("Or just provide the title of an article on Arxiv and the system will try to download it via API.")
+            gr.Markdown("By the way, the agents already have some base knowledge of both articles and code repositories :) ")
             
             with gr.Row():
                 file_up = gr.File(label="Upload PDF Local", file_count="multiple", file_types=[".pdf"])
                 arxiv_in = gr.Textbox(label="Título no Arxiv (Baixar via API)", placeholder="Ex: Attention is all you need")
                 repo_in = gr.Textbox(label="URL Git (Clonar)", placeholder="https://github.com/user/repo")
             
-            btn_train = gr.Button("💾 Ingerir e Treinar", variant="stop")
-            log_out = gr.Textbox(label="Logs do Sistema", lines=10)
+            btn_train = gr.Button("💾 Ingest and train", variant="stop")
+            log_out = gr.Textbox(label="System logs", lines=10)
             
             btn_train.click(fn=handle_training, inputs=[file_up, arxiv_in, repo_in], outputs=log_out)
 
