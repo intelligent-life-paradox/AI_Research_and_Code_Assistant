@@ -16,7 +16,7 @@ class CreateCrew():
 
     def _build_llm(self, role: str, default_model: str, default_temp: float, default_max_tokens: int):
         model = os.getenv(f'MODEL_{role}', default_model)
-        
+        #CONFIGURAÇÕES DE AMBIENTE LOCAL:
         if model.startswith('groq/'):
             api_key = os.getenv('GROQ_API_KEY')
             api_base = 'https://api.groq.com/openai/v1'

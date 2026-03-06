@@ -33,6 +33,6 @@ class CodesQueryTool(BaseTool):
         vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         index = VectorStoreIndex.from_vector_store(vector_store, storage_context=storage_context)
-        query_engine = index.as_query_engine(similarity_top_k=5)
+        query_engine = index.as_query_engine(similarity_top_k=2)
         response = query_engine.query(query)
         return str(response)
